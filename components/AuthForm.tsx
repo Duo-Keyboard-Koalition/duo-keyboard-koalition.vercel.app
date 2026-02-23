@@ -10,10 +10,12 @@ export default function AuthForm({
   view,
   error: initialError,
   message: initialMessage,
+  compact = false,
 }: {
   view: "signin" | "signup"
   error: string | null
   message: string | null
+  compact?: boolean
 }) {
   const router = useRouter()
   const [isPending, setIsPending] = useState(false)
@@ -94,8 +96,20 @@ export default function AuthForm({
     }
   }
 
+  if (compact) {
+    return (
+      <Button
+        type="button"
+        onClick={() => router.push(`/?view=${isSignUp ? 'signup' : 'signin'}`)}
+        className="bg-cyan-500 hover:bg-cyan-600 text-black font-bold py-2 px-4 rounded-lg transition-colors"
+      >
+        {isSignUp ? "Sign Up" : "Sign In"}
+      </Button>
+    )
+  }
+
   return (
-    <>
+    <div className="w-full max-w-md mx-auto">
       {/* Toggle Buttons */}
       <div className="flex bg-[#0a0a1a]/50 rounded-xl p-1.5 mb-8 border border-cyan-500/20">
         <button
@@ -208,6 +222,6 @@ export default function AuthForm({
         </svg>
         Continue with Discord
       </Button>
-    </>
+    </div>
   )
 }
