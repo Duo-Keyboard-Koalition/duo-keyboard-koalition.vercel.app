@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import { useAuth } from "@/context/AuthContext"
 import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
@@ -26,7 +27,7 @@ export default function DashboardPage() {
 
   const handleSignOut = async () => {
     await signOut()
-    window.location.href = "https://duo-keyboard-koalition.github.io"
+    window.location.href = "/"
   }
 
   return (
@@ -92,18 +93,15 @@ export default function DashboardPage() {
           <div className="bg-[#0a0a0a]/80 backdrop-blur-sm border border-[#FFA500]/30 rounded-lg p-6 cyber-box">
             <div className="flex items-center gap-3 mb-4">
               <Link2 className="w-8 h-8 text-[#FFA500]" />
-              <h2 className="text-lg font-semibold text-[#FFA500]">Landing Site</h2>
+              <h2 className="text-lg font-semibold text-[#FFA500]">Home</h2>
             </div>
-            <p className="text-gray-400 text-sm mb-4">Visit our public landing page and learn more about DKK.</p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={() => window.open('https://duo-keyboard-koalition.github.io', '_blank')}
-            >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Visit Site
-            </Button>
+            <p className="text-gray-400 text-sm mb-4">Visit our home page.</p>
+            <Link href="/">
+              <Button variant="outline" size="sm" className="w-full">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Go to Home
+              </Button>
+            </Link>
           </div>
         </div>
 
