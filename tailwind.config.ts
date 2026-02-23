@@ -10,27 +10,58 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        neon: {
-          cyan: "#00FFFF",
-          blue: "#0066FF",
-          magenta: "#FF00FF",
-          pink: "#FF00CC",
-        },
+        background: "#050505",
+        foreground: "#ffffff",
         primary: {
-          DEFAULT: "#00FFFF", // Neon cyan
+          DEFAULT: "#FFA500", // Orange - matches github.io
           foreground: "#000000",
+          glow: "rgba(255, 165, 0, 0.5)",
+        },
+        secondary: {
+          DEFAULT: "#1a1a1a",
+          foreground: "#FFFFFF",
+        },
+        accent: {
+          DEFAULT: "#2a2a2a",
+          foreground: "#FFFFFF",
+        },
+        ring: "#FFA500",
+        border: "#2a2a2a",
+        input: "#2a2a2a",
+        card: {
+          DEFAULT: "#0a0a0a",
+          foreground: "#FFFFFF",
         },
       },
       boxShadow: {
-        "neon-cyan": "0 0 10px #00FFFF, 0 0 20px #00FFFF, 0 0 30px #00FFFF",
-        "neon-magenta": "0 0 10px #FF00FF, 0 0 20px #FF00FF, 0 0 30px #FF00FF",
-        "neon-gradient": "0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(255, 0, 255, 0.5)",
+        "cyber-glow": "0 0 10px rgba(255, 165, 0, 0.5), 0 0 20px rgba(255, 165, 0, 0.3)",
+        "cyber-glow-lg": "0 0 20px rgba(255, 165, 0, 0.8), 0 0 40px rgba(255, 165, 0, 0.5)",
+        "cyber-border": "0 0 10px rgba(255, 165, 0, 0.5), inset 0 0 10px rgba(255, 165, 0, 0.1)",
       },
-      backgroundImage: {
-        "neon-gradient": "linear-gradient(90deg, #00FFFF 0%, #0066FF 50%, #FF00FF 100%)",
-        "neon-gradient-vertical": "linear-gradient(180deg, #00FFFF 0%, #0066FF 50%, #FF00FF 100%)",
+      animation: {
+        "fade-in": "fadeIn 0.3s ease-out forwards",
+        "fade-in-up": "fadeInUp 1s ease-out forwards",
+        "pulse-glow": "pulseGlow 2s ease-in-out infinite",
+        "bounce-slow": "bounceSlow 2s infinite",
+      },
+      keyframes: {
+        fadeIn: {
+          "from": { opacity: "0", transform: "translateY(-20px)" },
+          "to": { opacity: "1", transform: "translateY(0)" },
+        },
+        fadeInUp: {
+          "from": { opacity: "0", transform: "translateY(30px)" },
+          "to": { opacity: "1", transform: "translateY(0)" },
+        },
+        pulseGlow: {
+          "0%, 100%": { opacity: "1", boxShadow: "0 0 10px rgba(255, 165, 0, 0.5), 0 0 20px rgba(255, 165, 0, 0.3)" },
+          "50%": { opacity: "0.8", boxShadow: "0 0 20px rgba(255, 165, 0, 0.8), 0 0 40px rgba(255, 165, 0, 0.5)" },
+        },
+        bounceSlow: {
+          "0%, 20%, 50%, 80%, 100%": { transform: "translateY(0)" },
+          "40%": { transform: "translateY(-10px)" },
+          "60%": { transform: "translateY(-5px)" },
+        },
       },
     },
   },

@@ -30,7 +30,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a1a] text-white p-8">
+    <div className="min-h-screen bg-[#050505] text-white p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
@@ -42,10 +42,10 @@ export default function DashboardPage() {
               className="w-12 h-12"
             />
             <div>
-              <h1 className="text-3xl font-bold text-white italic mb-2">
+              <h1 className="text-3xl font-bold text-white italic mb-2 cyber-glow">
                 DUO KEYBOARD KOALITION
               </h1>
-              <p className="text-cyan-300">Welcome to your dashboard</p>
+              <p className="text-[#FFA500]">Welcome to your dashboard</p>
             </div>
           </div>
           <Button onClick={handleSignOut}>
@@ -55,16 +55,16 @@ export default function DashboardPage() {
 
         {/* Quick Links */}
         <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <div className="bg-[#0a0a1a]/80 backdrop-blur-sm border border-cyan-500/30 rounded-lg p-6">
+          <div className="bg-[#0a0a0a]/80 backdrop-blur-sm border border-[#FFA500]/30 rounded-lg p-6 cyber-box">
             <div className="flex items-center gap-3 mb-4">
-              <FolderKanban className="w-8 h-8 text-cyan-400" />
-              <h2 className="text-lg font-semibold text-cyan-300">Projects</h2>
+              <FolderKanban className="w-8 h-8 text-[#FFA500]" />
+              <h2 className="text-lg font-semibold text-[#FFA500]">Projects</h2>
             </div>
             <p className="text-gray-400 text-sm mb-4">Explore community projects and showcase your work.</p>
             <Button
               variant="outline"
               size="sm"
-              className="w-full border-cyan-400 text-cyan-400 hover:bg-cyan-400/20"
+              className="w-full"
               onClick={() => window.open('https://duo-keyboard-koalition.github.io/projects', '_blank')}
             >
               <ExternalLink className="w-4 h-4 mr-2" />
@@ -72,16 +72,16 @@ export default function DashboardPage() {
             </Button>
           </div>
 
-          <div className="bg-[#0a0a1a]/80 backdrop-blur-sm border border-cyan-500/30 rounded-lg p-6">
+          <div className="bg-[#0a0a0a]/80 backdrop-blur-sm border border-[#FFA500]/30 rounded-lg p-6 cyber-box">
             <div className="flex items-center gap-3 mb-4">
-              <Users className="w-8 h-8 text-cyan-400" />
-              <h2 className="text-lg font-semibold text-cyan-300">Community</h2>
+              <Users className="w-8 h-8 text-[#FFA500]" />
+              <h2 className="text-lg font-semibold text-[#FFA500]">Community</h2>
             </div>
             <p className="text-gray-400 text-sm mb-4">Connect with other hackers and build together.</p>
             <Button
               variant="outline"
               size="sm"
-              className="w-full border-cyan-400 text-cyan-400 hover:bg-cyan-400/20"
+              className="w-full"
               onClick={() => window.open('https://discord.gg/6GaWZAawUc', '_blank')}
             >
               <ExternalLink className="w-4 h-4 mr-2" />
@@ -89,16 +89,16 @@ export default function DashboardPage() {
             </Button>
           </div>
 
-          <div className="bg-[#0a0a1a]/80 backdrop-blur-sm border border-cyan-500/30 rounded-lg p-6">
+          <div className="bg-[#0a0a0a]/80 backdrop-blur-sm border border-[#FFA500]/30 rounded-lg p-6 cyber-box">
             <div className="flex items-center gap-3 mb-4">
-              <Link2 className="w-8 h-8 text-cyan-400" />
-              <h2 className="text-lg font-semibold text-cyan-300">Landing Site</h2>
+              <Link2 className="w-8 h-8 text-[#FFA500]" />
+              <h2 className="text-lg font-semibold text-[#FFA500]">Landing Site</h2>
             </div>
             <p className="text-gray-400 text-sm mb-4">Visit our public landing page and learn more about DKK.</p>
             <Button
               variant="outline"
               size="sm"
-              className="w-full border-cyan-400 text-cyan-400 hover:bg-cyan-400/20"
+              className="w-full"
               onClick={() => window.open('https://duo-keyboard-koalition.github.io', '_blank')}
             >
               <ExternalLink className="w-4 h-4 mr-2" />
@@ -108,27 +108,27 @@ export default function DashboardPage() {
         </div>
 
         {/* User Profile */}
-        <div className="bg-[#0a0a1a]/80 backdrop-blur-sm border border-cyan-500/30 rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-cyan-300">Your Profile</h2>
+        <div className="bg-[#0a0a0a]/80 backdrop-blur-sm border border-[#FFA500]/30 rounded-lg p-6 mb-6 cyber-box">
+          <h2 className="text-xl font-semibold mb-4 text-[#FFA500]">Your Profile</h2>
           <div className="space-y-2 text-gray-300">
             <p>
-              <span className="font-medium text-cyan-400">Email:</span> {user.email}
+              <span className="font-medium text-[#FFA500]">Email:</span> {user.email}
             </p>
             <p>
-              <span className="font-medium text-cyan-400">User ID:</span> {user.id}
+              <span className="font-medium text-[#FFA500]">User ID:</span> {user.id}
             </p>
             {user.user_metadata?.full_name && (
               <p>
-                <span className="font-medium text-cyan-400">Name:</span> {user.user_metadata.full_name}
+                <span className="font-medium text-[#FFA500]">Name:</span> {user.user_metadata.full_name}
               </p>
             )}
           </div>
         </div>
 
         {/* User Data (JSON) */}
-        <div className="bg-[#0a0a1a]/80 backdrop-blur-sm border border-cyan-500/30 rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4 text-cyan-300">User Data (JSON)</h2>
-          <div className="bg-[#0a0a1a] rounded-lg p-4 border border-cyan-500/20 overflow-auto">
+        <div className="bg-[#0a0a0a]/80 backdrop-blur-sm border border-[#FFA500]/30 rounded-lg p-6 cyber-box">
+          <h2 className="text-xl font-semibold mb-4 text-[#FFA500]">User Data (JSON)</h2>
+          <div className="bg-[#050505] rounded-lg p-4 border border-[#FFA500]/20 overflow-auto">
             <pre className="text-sm text-gray-300 whitespace-pre-wrap break-words">
               {JSON.stringify(user, null, 2)}
             </pre>
