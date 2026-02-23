@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext"
 import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import Loading from "@/components/Loading"
-import { ExternalLink, Calendar, FolderKanban, Users } from "lucide-react"
+import { ExternalLink, FolderKanban, Users, Link2 } from "lucide-react"
 
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth()
@@ -26,7 +26,6 @@ export default function DashboardPage() {
 
   const handleSignOut = async () => {
     await signOut()
-    // Redirect to github.io landing page after sign out
     window.location.href = "https://duo-keyboard-koalition.github.io"
   }
 
@@ -55,45 +54,17 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Links */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div className="grid gap-6 md:grid-cols-3 mb-8">
           <div className="bg-[#0a0a1a]/80 backdrop-blur-sm border border-cyan-500/30 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Calendar className="w-8 h-8 text-cyan-400" />
-              <h2 className="text-lg font-semibold text-cyan-300">Events</h2>
-            </div>
-            <p className="text-gray-400 text-sm mb-4">Browse and RSVP to hackathons and community events.</p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 border-cyan-400 text-cyan-400 hover:bg-cyan-400/20"
-                onClick={() => window.open('https://app.getriver.io/beta/duo-keyboard-koalition', '_blank')}
-              >
-                <ExternalLink className="w-3 h-3 mr-1" />
-                Geriver
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 border-cyan-400 text-cyan-400 hover:bg-cyan-400/20"
-                onClick={() => window.open('https://luma.com/calendar/manage/cal-FUq4o98pyWykY3q', '_blank')}
-              >
-                <ExternalLink className="w-3 h-3 mr-1" />
-                Luma
-              </Button>
-            </div>
-          </div>
-
-          <div className="bg-[#0a0a1a]/80 backdrop-blur-sm border border-magenta-500/30 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <FolderKanban className="w-8 h-8 text-magenta-400" />
-              <h2 className="text-lg font-semibold text-magenta-300">Projects</h2>
+              <FolderKanban className="w-8 h-8 text-cyan-400" />
+              <h2 className="text-lg font-semibold text-cyan-300">Projects</h2>
             </div>
             <p className="text-gray-400 text-sm mb-4">Explore community projects and showcase your work.</p>
             <Button
               variant="outline"
               size="sm"
-              className="w-full border-magenta-400 text-magenta-400 hover:bg-magenta-400/20"
+              className="w-full border-cyan-400 text-cyan-400 hover:bg-cyan-400/20"
               onClick={() => window.open('https://duo-keyboard-koalition.github.io/projects', '_blank')}
             >
               <ExternalLink className="w-4 h-4 mr-2" />
@@ -120,7 +91,7 @@ export default function DashboardPage() {
 
           <div className="bg-[#0a0a1a]/80 backdrop-blur-sm border border-cyan-500/30 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-4">
-              <ExternalLink className="w-8 h-8 text-cyan-400" />
+              <Link2 className="w-8 h-8 text-cyan-400" />
               <h2 className="text-lg font-semibold text-cyan-300">Landing Site</h2>
             </div>
             <p className="text-gray-400 text-sm mb-4">Visit our public landing page and learn more about DKK.</p>
