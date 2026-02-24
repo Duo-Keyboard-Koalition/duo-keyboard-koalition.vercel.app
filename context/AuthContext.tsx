@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, type ReactNode, useState, useEffect } from "react"
+import { createContext, useContext, type ReactNode, useState, useEffect, useMemo } from "react"
 import { createClient } from "@/utils/supabase/client"
 import type { User } from "@supabase/supabase-js"
 
@@ -30,7 +30,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   // Derived state
   const isAuthenticated = !!user

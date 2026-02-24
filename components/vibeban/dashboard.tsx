@@ -20,6 +20,7 @@ interface TaskSummary {
   due_date: string | null;
   type: string;
   status: string;
+  project_id?: string;
 }
 
 export function Dashboard() {
@@ -33,6 +34,8 @@ export function Dashboard() {
     'projects'
   );
   const [myTasks, setMyTasks] = useState<TaskSummary[]>([]);
+  const [projectTasks, setProjectTasks] = useState<Record<string, TaskSummary[]>>({});
+  const [mainView, setMainView] = useState<'swimlanes' | 'project'>('swimlanes');
   const [sidebarWidth, setSidebarWidth] = useState(256);
   const minSidebarWidth = 200;
   const maxSidebarWidth = 480;
@@ -61,6 +64,10 @@ export function Dashboard() {
     loadMyTasks();
   }, []);
 
+  useEffect(() => {
+    loadProjectTasks();
+  }, [projects]);
+
   const loadProjects = async () => {
     const { data } = await supabase
       .from('projects')
@@ -86,6 +93,34 @@ export function Dashboard() {
     if (data) {
       setMyTasks(data);
     }
+  };
+
+  const loadProjectTasks = async () => {
+    if (projects.length === 0) {
+      setProjectTasks({});
+      return;
+    }
+
+    const projectIds = projects.map((project) => project.id);
+
+    const { data } = await supabase
+      .from('tasks')
+      .select('id, title, urgency, due_date, type, status, project_id')
+      .in('project_id', projectIds)
+      .eq('status', 'incomplete')
+      .order('created_at', { ascending: false });
+
+    if (!data) return;
+
+    const grouped = data.reduce<Record<string, TaskSummary[]>>((acc, task) => {
+      if (!acc[task.project_id]) {
+        acc[task.project_id] = [];
+      }
+      acc[task.project_id].push(task);
+      return acc;
+    }, {});
+
+    setProjectTasks(grouped);
   };
 
   const createProject = async () => {
@@ -126,9 +161,11 @@ export function Dashboard() {
     if (data) {
       setProjects([data, ...projects]);
       setSelectedProject(data);
+      setMainView('project');
       setNewProjectName('');
       setNewProjectDescription('');
       setShowProjectForm(false);
+      loadProjectTasks();
     }
   };
 
@@ -218,13 +255,13 @@ export function Dashboard() {
                       onChange={(e) => setRenamingName(e.target.value)}
                       onBlur={handleRenameProject}
                       onKeyDown={(e) => { if (e.key === 'Enter') handleRenameProject(); if (e.key === 'Escape') setIsRenamingProject(false); }}
-                      className="text-sm px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-md border border-blue-500 focus:outline-none dark:text-white"
+                      className="text-sm px-2 py-0.5 bg-background rounded-md border border-primary/50 focus:outline-none text-white"
                       autoFocus
                     />
                   ) : (
                     <button
                       onClick={() => { setRenamingName(selectedProject.name); setIsRenamingProject(true); }}
-                      className="text-sm text-gray-500 dark:text-gray-400 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-2 group max-w-[220px]"
+                      className="text-sm text-gray-300 px-2 py-0.5 bg-background rounded-md border border-primary/30 hover:border-primary/60 transition-colors flex items-center gap-2 group max-w-[220px]"
                       title="Click to rename project"
                     >
                       <span className="truncate">{selectedProject.name}</span>
@@ -253,8 +290,8 @@ export function Dashboard() {
       {/* Create Project Modal */}
       {showProjectForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+          <div className="bg-card p-6 rounded-2xl shadow-2xl max-w-md w-full border border-primary/30 cyber-box">
+            <h2 className="text-xl font-bold mb-4 text-white">
               New Project
             </h2>
             <input
@@ -262,7 +299,7 @@ export function Dashboard() {
               value={newProjectName}
               onChange={(e) => setNewProjectName(e.target.value)}
               placeholder="Project name"
-              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 border border-primary/40 rounded-lg mb-3 bg-background text-white focus:ring-2 focus:ring-primary focus:border-transparent"
               autoFocus
               onKeyDown={(e) => { if (e.key === 'Enter') createProject(); }}
             />
@@ -270,7 +307,7 @@ export function Dashboard() {
               value={newProjectDescription}
               onChange={(e) => setNewProjectDescription(e.target.value)}
               placeholder="Description (optional)"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-primary/40 rounded-lg mb-4 bg-background text-white focus:ring-2 focus:ring-primary focus:border-transparent"
               rows={3}
             />
             <div className="flex gap-2 justify-end">
@@ -280,13 +317,13 @@ export function Dashboard() {
                   setNewProjectName('');
                   setNewProjectDescription('');
                 }}
-                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={createProject}
-                className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                className="px-5 py-2 bg-primary/20 text-primary border border-primary/40 rounded-lg hover:bg-primary/30 font-medium transition-colors"
               >
                 Create
               </button>
@@ -299,7 +336,7 @@ export function Dashboard() {
       <div className="flex h-[calc(100vh-4rem)]">
         {/* Sidebar — resizable width */}
         <aside
-          className="relative bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto flex-shrink-0"
+          className="relative bg-card/70 border-r border-primary/30 overflow-y-auto flex-shrink-0"
           style={{ width: sidebarWidth }}
         >
           {/* Resize handle — drag to change sidebar width */}
@@ -317,8 +354,8 @@ export function Dashboard() {
               <button
                 onClick={() => setSidebarView('projects')}
                 className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${sidebarView === 'projects'
-                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'bg-primary/20 text-primary border border-primary/40'
+                  : 'text-gray-300 hover:bg-primary/10'
                   }`}
               >
                 📁 All Projects
@@ -326,8 +363,8 @@ export function Dashboard() {
               <button
                 onClick={() => setSidebarView('my-tasks')}
                 className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${sidebarView === 'my-tasks'
-                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'bg-primary/20 text-primary border border-primary/40'
+                  : 'text-gray-300 hover:bg-primary/10'
                   }`}
               >
                 ✓ My Tasks ({myTasks.length})
@@ -337,18 +374,18 @@ export function Dashboard() {
             {/* My Tasks sidebar */}
             {sidebarView === 'my-tasks' && myTasks.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-3 tracking-wider">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3 tracking-wider">
                   Assigned to You
                 </h3>
                 <div className="space-y-2">
                   {myTasks.slice(0, 10).map((task) => (
                     <div
                       key={task.id}
-                      className="p-2.5 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600"
+                      className="p-2.5 bg-background rounded-lg border border-primary/20"
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs">{getTypeEmoji(task.type)}</span>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate flex-1">
+                        <p className="text-sm font-medium text-white truncate flex-1">
                           {task.title}
                         </p>
                       </div>
@@ -361,7 +398,7 @@ export function Dashboard() {
                           {task.urgency || 'medium'}
                         </span>
                         {task.due_date && (
-                          <span className="text-xs text-gray-400 dark:text-gray-500">
+                          <span className="text-xs text-gray-400">
                             {new Date(task.due_date).toLocaleDateString()}
                           </span>
                         )}
@@ -376,12 +413,12 @@ export function Dashboard() {
             {sidebarView === 'projects' && (
               <div className="mt-6">
                 <div className="flex items-center justify-between mb-3 pr-1">
-                  <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                     Projects
                   </h3>
                   <button
                     onClick={() => setShowProjectForm(true)}
-                    className="px-2 py-1 bg-blue-600 text-white text-[10px] rounded-md hover:bg-blue-700 font-bold transition-colors uppercase tracking-tight"
+                    className="px-2 py-1 bg-primary/20 text-primary border border-primary/40 text-[10px] rounded-md hover:bg-primary/30 font-bold transition-colors uppercase tracking-tight"
                   >
                     + Project
                   </button>
@@ -391,10 +428,13 @@ export function Dashboard() {
                     <div
                       key={project.id}
                       className={`group flex items-center gap-1 w-full p-2 rounded-lg text-sm transition-colors ${selectedProject?.id === project.id
-                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? 'bg-primary/20 text-primary font-medium border border-primary/40'
+                        : 'text-gray-300 hover:bg-primary/10'
                         }`}
-                      onClick={() => setSelectedProject(project)}
+                      onClick={() => {
+                        setSelectedProject(project);
+                        setMainView('project');
+                      }}
                     >
                       <button className="flex-1 text-left truncate">
                         {project.name}
@@ -408,7 +448,7 @@ export function Dashboard() {
                             setRenamingName(project.name);
                             setIsRenamingProject(true);
                           }}
-                          className="p-1 hover:text-blue-600 transition-colors"
+                          className="p-1 hover:text-primary transition-colors"
                           title="Rename"
                         >
                           ✏️
@@ -432,9 +472,84 @@ export function Dashboard() {
         {/* Main content — fills remaining space */}
         <main className="flex-1 overflow-hidden flex flex-col">
           {selectedProject ? (
-            <TaskList projectId={selectedProject.id} />
+            mainView === 'project' ? (
+              <>
+                <div className="px-4 py-3 border-b border-primary/20 bg-card/40 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-gray-400">Vibe Ban</p>
+                    <h2 className="text-lg font-semibold text-primary">{selectedProject.name}</h2>
+                  </div>
+                  <button
+                    onClick={() => setMainView('swimlanes')}
+                    className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide bg-primary/20 text-primary border border-primary/40 rounded-md hover:bg-primary/30 transition-colors"
+                  >
+                    Back to Swim Lanes
+                  </button>
+                </div>
+                <TaskList projectId={selectedProject.id} />
+              </>
+            ) : (
+              <div className="flex-1 overflow-y-auto p-4 md:p-6">
+                <div className="mb-5">
+                  <h2 className="text-2xl font-bold text-white">Vibe Ban Swim Lanes</h2>
+                  <p className="text-sm text-gray-400 mt-1">Each project is rendered as its own lane for rapid builder flow.</p>
+                </div>
+
+                <div className="space-y-4">
+                  {projects.map((project) => {
+                    const laneTasks = projectTasks[project.id] || [];
+                    return (
+                      <section
+                        key={project.id}
+                        className="rounded-xl border border-primary/30 bg-card/60 p-4 cyber-box"
+                      >
+                        <div className="flex items-center justify-between gap-3 mb-3">
+                          <div>
+                            <h3 className="font-semibold text-primary">{project.name}</h3>
+                            <p className="text-xs text-gray-400">{laneTasks.length} open task{laneTasks.length === 1 ? '' : 's'}</p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setSelectedProject(project);
+                              setMainView('project');
+                            }}
+                            className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide bg-primary/20 text-primary border border-primary/40 rounded-md hover:bg-primary/30 transition-colors"
+                          >
+                            Open Lane
+                          </button>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <div className="flex gap-3 min-w-full pb-1">
+                            {laneTasks.length > 0 ? (
+                              laneTasks.slice(0, 12).map((task) => (
+                                <article
+                                  key={task.id}
+                                  className="min-w-[220px] max-w-[260px] rounded-lg border border-primary/20 bg-background p-3"
+                                >
+                                  <div className="flex items-center justify-between text-xs mb-2">
+                                    <span>{getTypeEmoji(task.type)}</span>
+                                    <span className={getUrgencyColor(task.urgency || 'medium')}>{task.urgency || 'medium'}</span>
+                                  </div>
+                                  <p className="text-sm font-medium text-white line-clamp-2">{task.title}</p>
+                                  {task.due_date && (
+                                    <p className="text-xs text-gray-400 mt-2">Due {new Date(task.due_date).toLocaleDateString()}</p>
+                                  )}
+                                </article>
+                              ))
+                            ) : (
+                              <p className="text-sm text-gray-500">No open tasks in this lane.</p>
+                            )}
+                          </div>
+                        </div>
+                      </section>
+                    );
+                  })}
+                </div>
+              </div>
+            )
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-400 dark:text-gray-500">
+            <div className="flex-1 flex items-center justify-center text-gray-400">
               <div className="text-center">
                 <div className="text-5xl mb-4">📁</div>
                 <p className="text-lg font-medium">No project selected</p>
