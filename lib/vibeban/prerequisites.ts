@@ -1,4 +1,4 @@
-import type { Prerequisite } from '@/lib/vibeban/types';
+import type { Prerequisite } from '@/lib/vibeban/types'
 
 /**
  * Returns true if adding (taskId -> prerequisiteTaskId) would create a cycle.
@@ -8,31 +8,31 @@ import type { Prerequisite } from '@/lib/vibeban/types';
 export function wouldCreateCycle(
   taskId: string,
   prerequisiteTaskId: string,
-  prerequisites: Prerequisite[]
+  prerequisites: Prerequisite[],
 ): boolean {
-  if (taskId === prerequisiteTaskId) return true;
+  if (taskId === prerequisiteTaskId) return true
 
   // Graph: task_id -> [prerequisite_task_ids] (who this task depends on)
-  const graph = new Map<string, string[]>();
+  const graph = new Map<string, string[]>()
   for (const p of prerequisites) {
-    const list = graph.get(p.task_id) ?? [];
-    list.push(p.prerequisite_task_id);
-    graph.set(p.task_id, list);
+    const list = graph.get(p.task_id) ?? []
+    list.push(p.prerequisite_task_id)
+    graph.set(p.task_id, list)
   }
 
   // BFS from prerequisiteTaskId: can we reach taskId?
   // If yes, then prerequisiteTaskId depends on ... taskId, so adding taskId -> prerequisiteTaskId would create a cycle.
-  const visited = new Set<string>();
-  const queue = [prerequisiteTaskId];
+  const visited = new Set<string>()
+  const queue = [prerequisiteTaskId]
   while (queue.length > 0) {
-    const node = queue.shift()!;
-    if (node === taskId) return true;
-    if (visited.has(node)) continue;
-    visited.add(node);
-    const next = graph.get(node) ?? [];
-    queue.push(...next);
+    const node = queue.shift()!
+    if (node === taskId) return true
+    if (visited.has(node)) continue
+    visited.add(node)
+    const next = graph.get(node) ?? []
+    queue.push(...next)
   }
-  return false;
+  return false
 }
 
 /**
@@ -41,9 +41,9 @@ export function wouldCreateCycle(
 export function filterCycleSafePrerequisites(
   taskId: string,
   candidateIds: string[],
-  prerequisites: Prerequisite[]
+  prerequisites: Prerequisite[],
 ): string[] {
   return candidateIds.filter(
-    (id) => !wouldCreateCycle(taskId, id, prerequisites)
-  );
+    (id) => !wouldCreateCycle(taskId, id, prerequisites),
+  )
 }

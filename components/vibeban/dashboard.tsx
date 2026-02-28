@@ -1,86 +1,94 @@
-'use client';
+'use client'
 
-import { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { createClient } from '@/utils/supabase/client';
-import { TaskList } from './task-list';
+import { useEffect, useState, useCallback } from 'react'
+import { useAuth } from '@/context/AuthContext'
+import { createClient } from '@/utils/supabase/client'
+import { TaskList } from './task-list'
 
-const supabase = createClient();
+const supabase = createClient()
 
 interface Project {
-  id: string;
-  name: string;
-  description: string;
+  id: string
+  name: string
+  description: string
 }
 
 interface TaskSummary {
-  id: string;
-  title: string;
-  urgency: string;
-  due_date: string | null;
-  type: string;
-  status: string;
-  project_id?: string;
+  id: string
+  title: string
+  urgency: string
+  due_date: string | null
+  type: string
+  status: string
+  project_id?: string
 }
 
 export function Dashboard() {
-  const { user, signOut } = useAuth();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [showProjectForm, setShowProjectForm] = useState(false);
-  const [newProjectName, setNewProjectName] = useState('');
-  const [newProjectDescription, setNewProjectDescription] = useState('');
+  const { user, signOut } = useAuth()
+  const [projects, setProjects] = useState<Project[]>([])
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [showProjectForm, setShowProjectForm] = useState(false)
+  const [newProjectName, setNewProjectName] = useState('')
+  const [newProjectDescription, setNewProjectDescription] = useState('')
   const [sidebarView, setSidebarView] = useState<'projects' | 'my-tasks'>(
-    'projects'
-  );
-  const [myTasks, setMyTasks] = useState<TaskSummary[]>([]);
-  const [projectTasks, setProjectTasks] = useState<Record<string, TaskSummary[]>>({});
-  const [mainView, setMainView] = useState<'swimlanes' | 'project'>('swimlanes');
-  const [sidebarWidth, setSidebarWidth] = useState(256);
-  const minSidebarWidth = 200;
-  const maxSidebarWidth = 480;
+    'projects',
+  )
+  const [myTasks, setMyTasks] = useState<TaskSummary[]>([])
+  const [projectTasks, setProjectTasks] = useState<
+    Record<string, TaskSummary[]>
+  >({})
+  const [mainView, setMainView] = useState<'swimlanes' | 'project'>('swimlanes')
+  const [sidebarWidth, setSidebarWidth] = useState(256)
+  const minSidebarWidth = 200
+  const maxSidebarWidth = 480
 
-  const handleResizeStart = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-    const onMove = (moveEvent: MouseEvent) => {
-      setSidebarWidth(
-        Math.min(maxSidebarWidth, Math.max(minSidebarWidth, moveEvent.clientX))
-      );
-    };
-    const onUp = () => {
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  }, [minSidebarWidth, maxSidebarWidth]);
+  const handleResizeStart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      document.body.style.cursor = 'col-resize'
+      document.body.style.userSelect = 'none'
+      const onMove = (moveEvent: MouseEvent) => {
+        setSidebarWidth(
+          Math.min(
+            maxSidebarWidth,
+            Math.max(minSidebarWidth, moveEvent.clientX),
+          ),
+        )
+      }
+      const onUp = () => {
+        document.body.style.cursor = ''
+        document.body.style.userSelect = ''
+        document.removeEventListener('mousemove', onMove)
+        document.removeEventListener('mouseup', onUp)
+      }
+      document.addEventListener('mousemove', onMove)
+      document.addEventListener('mouseup', onUp)
+    },
+    [minSidebarWidth, maxSidebarWidth],
+  )
 
   useEffect(() => {
-    loadProjects();
-    loadMyTasks();
-  }, []);
+    loadProjects()
+    loadMyTasks()
+  }, [])
 
   useEffect(() => {
-    loadProjectTasks();
-  }, [projects]);
+    loadProjectTasks()
+  }, [projects])
 
   const loadProjects = async () => {
     const { data } = await supabase
       .from('projects')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
 
     if (data) {
-      setProjects(data);
+      setProjects(data)
       if (data.length > 0 && !selectedProject) {
-        setSelectedProject(data[0]);
+        setSelectedProject(data[0])
       }
     }
-  };
+  }
 
   const loadMyTasks = async () => {
     const { data } = await supabase
@@ -88,46 +96,46 @@ export function Dashboard() {
       .select('id, title, urgency, due_date, type, status')
       .eq('assignee_id', user?.id)
       .eq('status', 'incomplete')
-      .order('due_date', { ascending: true });
+      .order('due_date', { ascending: true })
 
     if (data) {
-      setMyTasks(data);
+      setMyTasks(data)
     }
-  };
+  }
 
   const loadProjectTasks = async () => {
     if (projects.length === 0) {
-      setProjectTasks({});
-      return;
+      setProjectTasks({})
+      return
     }
 
-    const projectIds = projects.map((project) => project.id);
+    const projectIds = projects.map((project) => project.id)
 
     const { data } = await supabase
       .from('tasks')
       .select('id, title, urgency, due_date, type, status, project_id')
       .in('project_id', projectIds)
       .eq('status', 'incomplete')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
 
-    if (!data) return;
+    if (!data) return
 
     const grouped = data.reduce<Record<string, TaskSummary[]>>((acc, task) => {
       if (!acc[task.project_id]) {
-        acc[task.project_id] = [];
+        acc[task.project_id] = []
       }
-      acc[task.project_id].push(task);
-      return acc;
-    }, {});
+      acc[task.project_id].push(task)
+      return acc
+    }, {})
 
-    setProjectTasks(grouped);
-  };
+    setProjectTasks(grouped)
+  }
 
   const createProject = async () => {
-    if (!newProjectName.trim()) return;
+    if (!newProjectName.trim()) return
     if (!user?.id) {
-      alert('No valid user session. Please sign out and sign back in.');
-      return;
+      alert('No valid user session. Please sign out and sign back in.')
+      return
     }
 
     const { data, error } = await supabase
@@ -140,109 +148,127 @@ export function Dashboard() {
         },
       ])
       .select()
-      .single();
+      .single()
 
     if (error) {
-      console.error('Error creating project:', error);
+      console.error('Error creating project:', error)
       if (
         error.message?.includes('foreign key') ||
         error.message?.includes('violates')
       ) {
         alert(
-          'Your session is stale. Please sign out and create a new account.'
-        );
-        await supabase.auth.signOut();
+          'Your session is stale. Please sign out and create a new account.',
+        )
+        await supabase.auth.signOut()
       } else {
-        alert(`Error creating project: ${error.message}`);
+        alert(`Error creating project: ${error.message}`)
       }
-      return;
+      return
     }
 
     if (data) {
-      setProjects([data, ...projects]);
-      setSelectedProject(data);
-      setMainView('project');
-      setNewProjectName('');
-      setNewProjectDescription('');
-      setShowProjectForm(false);
-      loadProjectTasks();
+      setProjects([data, ...projects])
+      setSelectedProject(data)
+      setMainView('project')
+      setNewProjectName('')
+      setNewProjectDescription('')
+      setShowProjectForm(false)
+      loadProjectTasks()
     }
-  };
+  }
 
   const handleSignOut = async () => {
-    await signOut();
-    window.location.href = '/';
-  };
+    await signOut()
+    window.location.href = '/'
+  }
 
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
       case 'critical':
-        return 'text-red-600 dark:text-red-400';
+        return 'text-red-600 dark:text-red-400'
       case 'high':
-        return 'text-orange-600 dark:text-orange-400';
+        return 'text-orange-600 dark:text-orange-400'
       case 'medium':
-        return 'text-yellow-600 dark:text-yellow-400';
+        return 'text-yellow-600 dark:text-yellow-400'
       case 'low':
-        return 'text-green-600 dark:text-green-400';
+        return 'text-green-600 dark:text-green-400'
       default:
-        return 'text-gray-600 dark:text-gray-400';
+        return 'text-gray-600 dark:text-gray-400'
     }
-  };
+  }
 
   const getTypeEmoji = (type: string) => {
     switch (type) {
-      case 'review': return '🔍';
-      case 'bug': return '🐛';
-      case 'feature': return '✨';
-      case 'research': return '🔬';
-      default: return '📋';
+      case 'review':
+        return '🔍'
+      case 'bug':
+        return '🐛'
+      case 'feature':
+        return '✨'
+      case 'research':
+        return '🔬'
+      default:
+        return '📋'
     }
-  };
+  }
 
-  const [isRenamingProject, setIsRenamingProject] = useState(false);
-  const [renamingName, setRenamingName] = useState('');
+  const [isRenamingProject, setIsRenamingProject] = useState(false)
+  const [renamingName, setRenamingName] = useState('')
 
   const handleRenameProject = async () => {
-    if (!selectedProject || !renamingName.trim() || renamingName === selectedProject.name) {
-      setIsRenamingProject(false);
-      return;
+    if (
+      !selectedProject ||
+      !renamingName.trim() ||
+      renamingName === selectedProject.name
+    ) {
+      setIsRenamingProject(false)
+      return
     }
 
     const { error } = await supabase
       .from('projects')
       .update({ name: renamingName })
-      .eq('id', selectedProject.id);
+      .eq('id', selectedProject.id)
 
     if (error) {
-      alert(`Error renaming project: ${error.message}`);
+      alert(`Error renaming project: ${error.message}`)
     } else {
-      setProjects(projects.map(p => p.id === selectedProject.id ? { ...p, name: renamingName } : p));
-      setSelectedProject({ ...selectedProject, name: renamingName });
+      setProjects(
+        projects.map((p) =>
+          p.id === selectedProject.id ? { ...p, name: renamingName } : p,
+        ),
+      )
+      setSelectedProject({ ...selectedProject, name: renamingName })
     }
-    setIsRenamingProject(false);
-  };
+    setIsRenamingProject(false)
+  }
 
   const handleRemoveProject = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this project and all its tasks?')) return;
+    e.stopPropagation()
+    if (
+      !confirm(
+        'Are you sure you want to delete this project and all its tasks?',
+      )
+    )
+      return
 
-    const { error } = await supabase.from('projects').delete().eq('id', id);
+    const { error } = await supabase.from('projects').delete().eq('id', id)
     if (error) {
-      alert(`Error deleting project: ${error.message}`);
+      alert(`Error deleting project: ${error.message}`)
     } else {
-      setProjects(projects.filter(p => p.id !== id));
-      if (selectedProject?.id === id) setSelectedProject(null);
+      setProjects(projects.filter((p) => p.id !== id))
+      if (selectedProject?.id === id) setSelectedProject(null)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-background text-white transition-colors">
       {/* Nav */}
-      <nav className="bg-card/90 backdrop-blur-sm border-b border-primary/30">
+      <nav className="border-b border-primary/30 bg-card/90 backdrop-blur-sm">
         <div className="max-w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-4">
-              <h1 className="text-xl font-bold text-primary italic cyber-glow">
+              <h1 className="cyber-glow text-xl font-bold italic text-primary">
                 DKK Build Velocity
               </h1>
 
@@ -254,18 +280,26 @@ export function Dashboard() {
                       value={renamingName}
                       onChange={(e) => setRenamingName(e.target.value)}
                       onBlur={handleRenameProject}
-                      onKeyDown={(e) => { if (e.key === 'Enter') handleRenameProject(); if (e.key === 'Escape') setIsRenamingProject(false); }}
-                      className="text-sm px-2 py-0.5 bg-background rounded-md border border-primary/50 focus:outline-none text-white"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleRenameProject()
+                        if (e.key === 'Escape') setIsRenamingProject(false)
+                      }}
+                      className="rounded-md border border-primary/50 bg-background px-2 py-0.5 text-sm text-white focus:outline-none"
                       autoFocus
                     />
                   ) : (
                     <button
-                      onClick={() => { setRenamingName(selectedProject.name); setIsRenamingProject(true); }}
-                      className="text-sm text-gray-300 px-2 py-0.5 bg-background rounded-md border border-primary/30 hover:border-primary/60 transition-colors flex items-center gap-2 group max-w-[220px]"
+                      onClick={() => {
+                        setRenamingName(selectedProject.name)
+                        setIsRenamingProject(true)
+                      }}
+                      className="group flex max-w-[220px] items-center gap-2 rounded-md border border-primary/30 bg-background px-2 py-0.5 text-sm text-gray-300 transition-colors hover:border-primary/60"
                       title="Click to rename project"
                     >
                       <span className="truncate">{selectedProject.name}</span>
-                      <span className="opacity-0 group-hover:opacity-100 text-[10px] flex-shrink-0">✏️</span>
+                      <span className="flex-shrink-0 text-[10px] opacity-0 group-hover:opacity-100">
+                        ✏️
+                      </span>
                     </button>
                   )}
                 </div>
@@ -273,12 +307,10 @@ export function Dashboard() {
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-300">
-                {user?.email}
-              </span>
+              <span className="text-sm text-gray-300">{user?.email}</span>
               <button
                 onClick={handleSignOut}
-                className="px-3 py-1.5 text-sm text-primary hover:text-white transition-colors"
+                className="px-3 py-1.5 text-sm text-primary transition-colors hover:text-white"
               >
                 Sign Out
               </button>
@@ -289,41 +321,41 @@ export function Dashboard() {
 
       {/* Create Project Modal */}
       {showProjectForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-          <div className="bg-card p-6 rounded-2xl shadow-2xl max-w-md w-full border border-primary/30 cyber-box">
-            <h2 className="text-xl font-bold mb-4 text-white">
-              New Project
-            </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="cyber-box w-full max-w-md rounded-2xl border border-primary/30 bg-card p-6 shadow-2xl">
+            <h2 className="mb-4 text-xl font-bold text-white">New Project</h2>
             <input
               type="text"
               value={newProjectName}
               onChange={(e) => setNewProjectName(e.target.value)}
               placeholder="Project name"
-              className="w-full px-4 py-2.5 border border-primary/40 rounded-lg mb-3 bg-background text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="mb-3 w-full rounded-lg border border-primary/40 bg-background px-4 py-2.5 text-white focus:border-transparent focus:ring-2 focus:ring-primary"
               autoFocus
-              onKeyDown={(e) => { if (e.key === 'Enter') createProject(); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') createProject()
+              }}
             />
             <textarea
               value={newProjectDescription}
               onChange={(e) => setNewProjectDescription(e.target.value)}
               placeholder="Description (optional)"
-              className="w-full px-4 py-2 border border-primary/40 rounded-lg mb-4 bg-background text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="mb-4 w-full rounded-lg border border-primary/40 bg-background px-4 py-2 text-white focus:border-transparent focus:ring-2 focus:ring-primary"
               rows={3}
             />
-            <div className="flex gap-2 justify-end">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => {
-                  setShowProjectForm(false);
-                  setNewProjectName('');
-                  setNewProjectDescription('');
+                  setShowProjectForm(false)
+                  setNewProjectName('')
+                  setNewProjectDescription('')
                 }}
-                className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+                className="px-4 py-2 text-gray-300 transition-colors hover:text-white"
               >
                 Cancel
               </button>
               <button
                 onClick={createProject}
-                className="px-5 py-2 bg-primary/20 text-primary border border-primary/40 rounded-lg hover:bg-primary/30 font-medium transition-colors"
+                className="rounded-lg border border-primary/40 bg-primary/20 px-5 py-2 font-medium text-primary transition-colors hover:bg-primary/30"
               >
                 Create
               </button>
@@ -336,7 +368,7 @@ export function Dashboard() {
       <div className="flex h-[calc(100vh-4rem)]">
         {/* Sidebar — resizable width */}
         <aside
-          className="relative bg-card/70 border-r border-primary/30 overflow-y-auto flex-shrink-0"
+          className="relative flex-shrink-0 overflow-y-auto border-r border-primary/30 bg-card/70"
           style={{ width: sidebarWidth }}
         >
           {/* Resize handle — drag to change sidebar width */}
@@ -344,28 +376,30 @@ export function Dashboard() {
             type="button"
             aria-label="Resize sidebar"
             onMouseDown={handleResizeStart}
-            className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-blue-500/20 active:bg-blue-500/40 transition-colors z-10 flex items-center justify-center group"
+            className="group absolute right-0 top-0 z-10 flex h-full w-1.5 cursor-col-resize items-center justify-center transition-colors hover:bg-blue-500/20 active:bg-blue-500/40"
           >
             <span className="absolute inset-y-0 -left-1 w-3" aria-hidden />
-            <span className="w-0.5 h-12 rounded-full bg-gray-300 dark:bg-gray-600 group-hover:bg-blue-500/80 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+            <span className="pointer-events-none h-12 w-0.5 rounded-full bg-gray-300 opacity-0 transition-opacity group-hover:bg-blue-500/80 group-hover:opacity-100 dark:bg-gray-600" />
           </button>
           <div className="p-4">
             <nav className="space-y-1">
               <button
                 onClick={() => setSidebarView('projects')}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${sidebarView === 'projects'
-                  ? 'bg-primary/20 text-primary border border-primary/40'
-                  : 'text-gray-300 hover:bg-primary/10'
-                  }`}
+                className={`w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
+                  sidebarView === 'projects'
+                    ? 'border border-primary/40 bg-primary/20 text-primary'
+                    : 'text-gray-300 hover:bg-primary/10'
+                }`}
               >
                 📁 All Projects
               </button>
               <button
                 onClick={() => setSidebarView('my-tasks')}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${sidebarView === 'my-tasks'
-                  ? 'bg-primary/20 text-primary border border-primary/40'
-                  : 'text-gray-300 hover:bg-primary/10'
-                  }`}
+                className={`w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
+                  sidebarView === 'my-tasks'
+                    ? 'border border-primary/40 bg-primary/20 text-primary'
+                    : 'text-gray-300 hover:bg-primary/10'
+                }`}
               >
                 ✓ My Tasks ({myTasks.length})
               </button>
@@ -374,25 +408,27 @@ export function Dashboard() {
             {/* My Tasks sidebar */}
             {sidebarView === 'my-tasks' && myTasks.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase mb-3 tracking-wider">
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
                   Assigned to You
                 </h3>
                 <div className="space-y-2">
                   {myTasks.slice(0, 10).map((task) => (
                     <div
                       key={task.id}
-                      className="p-2.5 bg-background rounded-lg border border-primary/20"
+                      className="rounded-lg border border-primary/20 bg-background p-2.5"
                     >
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs">{getTypeEmoji(task.type)}</span>
-                        <p className="text-sm font-medium text-white truncate flex-1">
+                        <span className="text-xs">
+                          {getTypeEmoji(task.type)}
+                        </span>
+                        <p className="flex-1 truncate text-sm font-medium text-white">
                           {task.title}
                         </p>
                       </div>
-                      <div className="flex items-center justify-between mt-1.5">
+                      <div className="mt-1.5 flex items-center justify-between">
                         <span
                           className={`text-xs font-medium ${getUrgencyColor(
-                            task.urgency || 'medium'
+                            task.urgency || 'medium',
                           )}`}
                         >
                           {task.urgency || 'medium'}
@@ -412,13 +448,13 @@ export function Dashboard() {
             {/* Projects list */}
             {sidebarView === 'projects' && (
               <div className="mt-6">
-                <div className="flex items-center justify-between mb-3 pr-1">
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <div className="mb-3 flex items-center justify-between pr-1">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
                     Projects
                   </h3>
                   <button
                     onClick={() => setShowProjectForm(true)}
-                    className="px-2 py-1 bg-primary/20 text-primary border border-primary/40 text-[10px] rounded-md hover:bg-primary/30 font-bold transition-colors uppercase tracking-tight"
+                    className="rounded-md border border-primary/40 bg-primary/20 px-2 py-1 text-[10px] font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary/30"
                   >
                     + Project
                   </button>
@@ -427,35 +463,36 @@ export function Dashboard() {
                   {projects.map((project) => (
                     <div
                       key={project.id}
-                      className={`group flex items-center gap-1 w-full p-2 rounded-lg text-sm transition-colors ${selectedProject?.id === project.id
-                        ? 'bg-primary/20 text-primary font-medium border border-primary/40'
-                        : 'text-gray-300 hover:bg-primary/10'
-                        }`}
+                      className={`group flex w-full items-center gap-1 rounded-lg p-2 text-sm transition-colors ${
+                        selectedProject?.id === project.id
+                          ? 'border border-primary/40 bg-primary/20 font-medium text-primary'
+                          : 'text-gray-300 hover:bg-primary/10'
+                      }`}
                       onClick={() => {
-                        setSelectedProject(project);
-                        setMainView('project');
+                        setSelectedProject(project)
+                        setMainView('project')
                       }}
                     >
-                      <button className="flex-1 text-left truncate">
+                      <button className="flex-1 truncate text-left">
                         {project.name}
                       </button>
 
-                      <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
                         <button
                           onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedProject(project);
-                            setRenamingName(project.name);
-                            setIsRenamingProject(true);
+                            e.stopPropagation()
+                            setSelectedProject(project)
+                            setRenamingName(project.name)
+                            setIsRenamingProject(true)
                           }}
-                          className="p-1 hover:text-primary transition-colors"
+                          className="p-1 transition-colors hover:text-primary"
                           title="Rename"
                         >
                           ✏️
                         </button>
                         <button
                           onClick={(e) => handleRemoveProject(project.id, e)}
-                          className="p-1 hover:text-red-600 transition-colors"
+                          className="p-1 transition-colors hover:text-red-600"
                           title="Delete"
                         >
                           🗑️
@@ -470,18 +507,22 @@ export function Dashboard() {
         </aside>
 
         {/* Main content — fills remaining space */}
-        <main className="flex-1 overflow-hidden flex flex-col">
+        <main className="flex flex-1 flex-col overflow-hidden">
           {selectedProject ? (
             mainView === 'project' ? (
               <>
-                <div className="px-4 py-3 border-b border-primary/20 bg-card/40 flex items-center justify-between">
+                <div className="flex items-center justify-between border-b border-primary/20 bg-card/40 px-4 py-3">
                   <div>
-                    <p className="text-xs uppercase tracking-wider text-gray-400">Vibe Ban</p>
-                    <h2 className="text-lg font-semibold text-primary">{selectedProject.name}</h2>
+                    <p className="text-xs uppercase tracking-wider text-gray-400">
+                      Vibe Ban
+                    </p>
+                    <h2 className="text-lg font-semibold text-primary">
+                      {selectedProject.name}
+                    </h2>
                   </div>
                   <button
                     onClick={() => setMainView('swimlanes')}
-                    className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide bg-primary/20 text-primary border border-primary/40 rounded-md hover:bg-primary/30 transition-colors"
+                    className="rounded-md border border-primary/40 bg-primary/20 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-primary transition-colors hover:bg-primary/30"
                   >
                     Back to Swim Lanes
                   </button>
@@ -491,69 +532,94 @@ export function Dashboard() {
             ) : (
               <div className="flex-1 overflow-y-auto p-4 md:p-6">
                 <div className="mb-5">
-                  <h2 className="text-2xl font-bold text-white">Vibe Ban Swim Lanes</h2>
-                  <p className="text-sm text-gray-400 mt-1">Each project is rendered as its own lane for rapid builder flow.</p>
+                  <h2 className="text-2xl font-bold text-white">
+                    Vibe Ban Swim Lanes
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-400">
+                    Each project is rendered as its own lane for rapid builder
+                    flow.
+                  </p>
                 </div>
 
                 <div className="space-y-4">
                   {projects.map((project) => {
-                    const laneTasks = projectTasks[project.id] || [];
+                    const laneTasks = projectTasks[project.id] || []
                     return (
                       <section
                         key={project.id}
-                        className="rounded-xl border border-primary/30 bg-card/60 p-4 cyber-box"
+                        className="cyber-box rounded-xl border border-primary/30 bg-card/60 p-4"
                       >
-                        <div className="flex items-center justify-between gap-3 mb-3">
+                        <div className="mb-3 flex items-center justify-between gap-3">
                           <div>
-                            <h3 className="font-semibold text-primary">{project.name}</h3>
-                            <p className="text-xs text-gray-400">{laneTasks.length} open task{laneTasks.length === 1 ? '' : 's'}</p>
+                            <h3 className="font-semibold text-primary">
+                              {project.name}
+                            </h3>
+                            <p className="text-xs text-gray-400">
+                              {laneTasks.length} open task
+                              {laneTasks.length === 1 ? '' : 's'}
+                            </p>
                           </div>
                           <button
                             onClick={() => {
-                              setSelectedProject(project);
-                              setMainView('project');
+                              setSelectedProject(project)
+                              setMainView('project')
                             }}
-                            className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide bg-primary/20 text-primary border border-primary/40 rounded-md hover:bg-primary/30 transition-colors"
+                            className="rounded-md border border-primary/40 bg-primary/20 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-primary transition-colors hover:bg-primary/30"
                           >
                             Open Lane
                           </button>
                         </div>
 
                         <div className="overflow-x-auto">
-                          <div className="flex gap-3 min-w-full pb-1">
+                          <div className="flex min-w-full gap-3 pb-1">
                             {laneTasks.length > 0 ? (
                               laneTasks.slice(0, 12).map((task) => (
                                 <article
                                   key={task.id}
                                   className="min-w-[220px] max-w-[260px] rounded-lg border border-primary/20 bg-background p-3"
                                 >
-                                  <div className="flex items-center justify-between text-xs mb-2">
+                                  <div className="mb-2 flex items-center justify-between text-xs">
                                     <span>{getTypeEmoji(task.type)}</span>
-                                    <span className={getUrgencyColor(task.urgency || 'medium')}>{task.urgency || 'medium'}</span>
+                                    <span
+                                      className={getUrgencyColor(
+                                        task.urgency || 'medium',
+                                      )}
+                                    >
+                                      {task.urgency || 'medium'}
+                                    </span>
                                   </div>
-                                  <p className="text-sm font-medium text-white line-clamp-2">{task.title}</p>
+                                  <p className="line-clamp-2 text-sm font-medium text-white">
+                                    {task.title}
+                                  </p>
                                   {task.due_date && (
-                                    <p className="text-xs text-gray-400 mt-2">Due {new Date(task.due_date).toLocaleDateString()}</p>
+                                    <p className="mt-2 text-xs text-gray-400">
+                                      Due{' '}
+                                      {new Date(
+                                        task.due_date,
+                                      ).toLocaleDateString()}
+                                    </p>
                                   )}
                                 </article>
                               ))
                             ) : (
-                              <p className="text-sm text-gray-500">No open tasks in this lane.</p>
+                              <p className="text-sm text-gray-500">
+                                No open tasks in this lane.
+                              </p>
                             )}
                           </div>
                         </div>
                       </section>
-                    );
+                    )
                   })}
                 </div>
               </div>
             )
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-400">
+            <div className="flex flex-1 items-center justify-center text-gray-400">
               <div className="text-center">
-                <div className="text-5xl mb-4">📁</div>
+                <div className="mb-4 text-5xl">📁</div>
                 <p className="text-lg font-medium">No project selected</p>
-                <p className="text-sm mt-1">
+                <p className="mt-1 text-sm">
                   Select or create a project to get started
                 </p>
               </div>
@@ -562,5 +628,5 @@ export function Dashboard() {
         </main>
       </div>
     </div>
-  );
+  )
 }

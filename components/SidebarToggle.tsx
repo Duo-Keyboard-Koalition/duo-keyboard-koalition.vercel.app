@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import { Menu, X } from "lucide-react"
+import { Menu, X } from 'lucide-react'
 
 export default function SidebarToggle({
   isOpen,
-  onToggle
+  onToggle,
 }: {
   isOpen: boolean
   onToggle: () => void
@@ -12,11 +12,10 @@ export default function SidebarToggle({
   return (
     <button
       onClick={onToggle}
-      className="text-primary hover:text-[#FFB84D] transition-colors ml-auto"
+      className="ml-auto text-primary transition-colors hover:text-[#FFB84D]"
       aria-label="Toggle sidebar"
     >
-      {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
     </button>
   )
 }
-

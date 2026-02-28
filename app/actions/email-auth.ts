@@ -1,25 +1,30 @@
-"use server"
+'use server'
 
-import { headers } from "next/headers"
-import { signInWithEmail, signUp } from "@/app/actions/auth"
+import { headers } from 'next/headers'
+import { signInWithEmail, signUp } from '@/app/actions/auth'
 
 export async function handleEmailAuth(
   prevState: { error?: string } | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ error?: string }> {
-  const email = formData.get("email") as string
-  const password = formData.get("password") as string
-  const isSignUp = formData.get("isSignUp") === "true"
-  
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  const isSignUp = formData.get('isSignUp') === 'true'
+
   // Get URL from headers (server-side)
   const headersList = await headers()
-  const origin = headersList.get("origin") || headersList.get("host")
-  const windowLocationHref = origin 
-    ? (origin.startsWith("http") ? origin : `https://${origin}`)
+  const origin = headersList.get('origin') || headersList.get('host')
+  const windowLocationHref = origin
+    ? origin.startsWith('http')
+      ? origin
+      : `https://${origin}`
     : undefined
 
   if (windowLocationHref) {
-    console.log(`${isSignUp ? "Sign up" : "Email login"} - window.location.href:`, windowLocationHref)
+    console.log(
+      `${isSignUp ? 'Sign up' : 'Email login'} - window.location.href:`,
+      windowLocationHref,
+    )
   }
 
   try {
@@ -30,7 +35,8 @@ export async function handleEmailAuth(
     }
     return {}
   } catch (error) {
-    return { error: error instanceof Error ? error.message : "An error occurred" }
+    return {
+      error: error instanceof Error ? error.message : 'An error occurred',
+    }
   }
 }
-

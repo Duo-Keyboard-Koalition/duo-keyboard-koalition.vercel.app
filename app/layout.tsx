@@ -1,41 +1,40 @@
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
+import type { Metadata } from 'next'
+import localFont from 'next/font/local'
+import './globals.css'
+import { AuthProvider } from '@/context/AuthContext'
 
 const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
+  src: './fonts/GeistVF.woff',
+  variable: '--font-geist-sans',
+  weight: '100 900',
+})
 const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+  src: './fonts/GeistMonoVF.woff',
+  variable: '--font-geist-mono',
+  weight: '100 900',
+})
 
 export const metadata: Metadata = {
-  title: "Duo Keyboard Koalition",
-  description: "Duo Keyboard Koalition — community hub for keyboard creators and players",
+  title: 'Duo Keyboard Koalition',
+  description:
+    'Duo Keyboard Koalition — community hub for keyboard creators and players',
   icons: {
-    icon: "/aurajay.png",
+    icon: '/aurajay.png',
   },
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background text-white`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background text-white antialiased`}
       >
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
-  );
+  )
 }

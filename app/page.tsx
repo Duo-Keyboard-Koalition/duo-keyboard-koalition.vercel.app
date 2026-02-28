@@ -1,44 +1,44 @@
-"use client"
+'use client'
 
-import { Suspense } from "react"
-import { useAuth } from "@/context/AuthContext"
-import { useSearchParams } from "next/navigation"
-import Loading from "@/components/Loading"
-import AuthForm from "@/components/AuthForm"
-import { ExternalLink } from "lucide-react"
+import { Suspense } from 'react'
+import { useAuth } from '@/context/AuthContext'
+import { useSearchParams } from 'next/navigation'
+import Loading from '@/components/Loading'
+import AuthForm from '@/components/AuthForm'
+import { ExternalLink } from 'lucide-react'
 
 function HomePageContent() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
-  
-  const view = (searchParams.get("view") as "signin" | "signup") || "signin"
+
+  const view = (searchParams.get('view') as 'signin' | 'signup') || 'signin'
 
   // If user is logged in, redirect to dashboard
   if (user) {
-    window.location.href = "/dashboard"
+    window.location.href = '/dashboard'
     return null
   }
 
   return (
-    <div className="max-w-2xl mx-auto text-center w-full">
-      <h1 className="text-5xl font-bold text-white italic mb-4 cyber-glow">
+    <div className="mx-auto w-full max-w-2xl text-center">
+      <h1 className="cyber-glow mb-4 text-5xl font-bold italic text-white">
         DUO KEYBOARD KOALITION
       </h1>
-      <p className="text-[#FFA500] text-xl mb-8">Hack. Build. Create.</p>
-      
+      <p className="mb-8 text-xl text-[#FFA500]">Hack. Build. Create.</p>
+
       <AuthForm view={view} error={null} message={null} />
 
       <div className="mt-8">
-        <p className="text-gray-500 text-sm">
-          Visit our public landing page at{" "}
+        <p className="text-sm text-gray-500">
+          Visit our public landing page at{' '}
           <a
             href="https://duo-keyboard-koalition.github.io"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#FFA500] hover:underline inline-flex items-center"
+            className="inline-flex items-center text-[#FFA500] hover:underline"
           >
             duo-keyboard-koalition.github.io
-            <ExternalLink className="w-3 h-3 ml-1" />
+            <ExternalLink className="ml-1 h-3 w-3" />
           </a>
         </p>
       </div>
@@ -51,23 +51,25 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
           <Loading />
-          <p className="text-gray-400 mt-4">Loading...</p>
+          <p className="mt-4 text-gray-400">Loading...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background text-white flex flex-col items-center justify-center p-8">
-      <Suspense fallback={
-        <div className="text-center">
-          <Loading />
-          <p className="text-gray-400 mt-4">Loading...</p>
-        </div>
-      }>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-8 text-white">
+      <Suspense
+        fallback={
+          <div className="text-center">
+            <Loading />
+            <p className="mt-4 text-gray-400">Loading...</p>
+          </div>
+        }
+      >
         <HomePageContent />
       </Suspense>
     </div>

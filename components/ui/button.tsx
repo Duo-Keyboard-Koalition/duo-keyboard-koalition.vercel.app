@@ -1,38 +1,42 @@
-import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
+import * as React from 'react'
+import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
+  'inline-flex items-center justify-center rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background',
   {
     variants: {
       variant: {
-        default: "bg-[#FFA500] text-black hover:bg-[#FFA500]/90 shadow-[0_0_10px_rgba(255,165,0,0.5)] hover:shadow-[0_0_20px_rgba(255,165,0,0.8)]",
-        destructive: "bg-red-600 text-white hover:bg-red-700",
-        outline: "border border-[#FFA500]/50 text-[#FFA500] hover:bg-[#FFA500]/10 hover:shadow-[0_0_10px_rgba(255,165,0,0.3)]",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "underline-offset-4 hover:underline text-primary",
+        default:
+          'bg-[#FFA500] text-black hover:bg-[#FFA500]/90 shadow-[0_0_10px_rgba(255,165,0,0.5)] hover:shadow-[0_0_20px_rgba(255,165,0,0.8)]',
+        destructive: 'bg-red-600 text-white hover:bg-red-700',
+        outline:
+          'border border-[#FFA500]/50 text-[#FFA500] hover:bg-[#FFA500]/10 hover:shadow-[0_0_10px_rgba(255,165,0,0.3)]',
+        secondary:
+          'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        link: 'underline-offset-4 hover:underline text-primary',
       },
       size: {
-        default: "h-10 py-2 px-4",
-        sm: "h-9 px-3 rounded-md",
-        lg: "h-11 px-8 rounded-md",
-        icon: "h-10 w-10",
+        default: 'h-10 py-2 px-4',
+        sm: 'h-9 px-3 rounded-md',
+        lg: 'h-11 px-8 rounded-md',
+        icon: 'h-10 w-10',
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: 'default',
+      size: 'default',
     },
-  }
-);
+  },
+)
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
+  asChild?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -44,7 +48,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           ref={ref}
           {...props}
         />
-      );
+      )
     }
     return (
       <button
@@ -52,9 +56,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...props}
       />
-    );
-  }
-);
-Button.displayName = "Button";
+    )
+  },
+)
+Button.displayName = 'Button'
 
-export { Button, buttonVariants };
+export { Button, buttonVariants }

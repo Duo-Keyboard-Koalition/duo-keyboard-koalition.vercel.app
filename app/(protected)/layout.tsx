@@ -1,4 +1,4 @@
-import Sidebar from "@/components/Sidebar"
+import Sidebar from '@/components/Sidebar'
 
 export default function ProtectedLayout({
   children,
@@ -7,4 +7,3 @@ export default function ProtectedLayout({
 }) {
   return <Sidebar>{children}</Sidebar>
 }
-

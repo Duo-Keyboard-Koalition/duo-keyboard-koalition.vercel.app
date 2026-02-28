@@ -1,8 +1,15 @@
-"use client"
+'use client'
 
-import { createContext, useContext, type ReactNode, useState, useEffect, useMemo } from "react"
-import { createClient } from "@/utils/supabase/client"
-import type { User } from "@supabase/supabase-js"
+import {
+  createContext,
+  useContext,
+  type ReactNode,
+  useState,
+  useEffect,
+  useMemo,
+} from 'react'
+import { createClient } from '@/utils/supabase/client'
+import type { User } from '@supabase/supabase-js'
 
 // Types for AuthContext
 interface AuthContextType {
@@ -48,14 +55,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (session?.user) {
           setUser(session.user)
-          console.log("User authenticated:", session.user.id)
+          console.log('User authenticated:', session.user.id)
         } else {
           setUser(null)
-          console.log("No active session")
+          console.log('No active session')
         }
       } catch (err) {
-        console.error("Error initializing auth:", err)
-        setError(err instanceof Error ? err.message : "Authentication error")
+        console.error('Error initializing auth:', err)
+        setError(err instanceof Error ? err.message : 'Authentication error')
       } finally {
         setLoading(false)
       }
@@ -67,7 +74,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event)
+      console.log('Auth state changed:', event)
 
       if (session?.user) {
         setUser(session.user)
@@ -97,15 +104,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Flush auth context completely
       setUser(null)
       setError(null)
-      
+
       // Clear any client-side storage
       if (typeof window !== 'undefined') {
         localStorage.clear()
         sessionStorage.clear()
       }
     } catch (error) {
-      console.error("Error signing out:", error)
-      setError(error instanceof Error ? error.message : "Sign out error")
+      console.error('Error signing out:', error)
+      setError(error instanceof Error ? error.message : 'Sign out error')
       // Still clear state even if signOut fails
       setUser(null)
       if (typeof window !== 'undefined') {
@@ -134,8 +141,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(currentUser)
       }
     } catch (error) {
-      console.error("Error refreshing user:", error)
-      setError(error instanceof Error ? error.message : "Refresh error")
+      console.error('Error refreshing user:', error)
+      setError(error instanceof Error ? error.message : 'Refresh error')
     } finally {
       setLoading(false)
     }
@@ -158,8 +165,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext)
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider")
+    throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
 }
-

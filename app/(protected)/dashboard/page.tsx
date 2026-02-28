@@ -1,19 +1,19 @@
-"use client"
+'use client'
 
-import Image from "next/image"
-import Link from "next/link"
-import { useAuth } from "@/context/AuthContext"
-import { useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import Loading from "@/components/Loading"
-import { ExternalLink, FolderKanban, Users, Link2 } from "lucide-react"
+import Image from 'next/image'
+import Link from 'next/link'
+import { useAuth } from '@/context/AuthContext'
+import { useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import Loading from '@/components/Loading'
+import { ExternalLink, FolderKanban, Users, Link2 } from 'lucide-react'
 
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth()
 
   useEffect(() => {
     if (!loading && !user) {
-      window.location.href = "/unauthorized"
+      window.location.href = '/unauthorized'
     }
   }, [user, loading])
 
@@ -27,78 +27,87 @@ export default function DashboardPage() {
 
   const handleSignOut = async () => {
     await signOut()
-    window.location.href = "/"
+    window.location.href = '/'
   }
 
   return (
-    <div className="min-h-screen bg-background text-white p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+    <div className="min-h-screen bg-background p-8 text-white">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
               src="/aurajay.png"
               alt="Duo Keyboard Koalition Logo"
               width={48}
               height={48}
-              className="w-12 h-12"
+              className="h-12 w-12"
             />
             <div>
-              <h1 className="text-3xl font-bold text-white italic mb-2 cyber-glow">
+              <h1 className="cyber-glow mb-2 text-3xl font-bold italic text-white">
                 DUO KEYBOARD KOALITION
               </h1>
               <p className="text-primary">Welcome to your dashboard</p>
             </div>
           </div>
-          <Button onClick={handleSignOut}>
-            Sign Out
-          </Button>
+          <Button onClick={handleSignOut}>Sign Out</Button>
         </div>
 
         {/* Quick Links */}
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <div className="bg-card/80 backdrop-blur-sm border border-primary/30 rounded-lg p-6 cyber-box">
-            <div className="flex items-center gap-3 mb-4">
-              <FolderKanban className="w-8 h-8 text-primary" />
+        <div className="mb-8 grid gap-6 md:grid-cols-3">
+          <div className="cyber-box rounded-lg border border-primary/30 bg-card/80 p-6 backdrop-blur-sm">
+            <div className="mb-4 flex items-center gap-3">
+              <FolderKanban className="h-8 w-8 text-primary" />
               <h2 className="text-lg font-semibold text-primary">Projects</h2>
             </div>
-            <p className="text-gray-400 text-sm mb-4">Explore community projects and showcase your work.</p>
+            <p className="mb-4 text-sm text-gray-400">
+              Explore community projects and showcase your work.
+            </p>
             <Button
               variant="outline"
               size="sm"
               className="w-full"
-              onClick={() => window.open('https://duo-keyboard-koalition.github.io/projects', '_blank')}
+              onClick={() =>
+                window.open(
+                  'https://duo-keyboard-koalition.github.io/projects',
+                  '_blank',
+                )
+              }
             >
-              <ExternalLink className="w-4 h-4 mr-2" />
+              <ExternalLink className="mr-2 h-4 w-4" />
               View Projects
             </Button>
           </div>
 
-          <div className="bg-card/80 backdrop-blur-sm border border-primary/30 rounded-lg p-6 cyber-box">
-            <div className="flex items-center gap-3 mb-4">
-              <Users className="w-8 h-8 text-primary" />
+          <div className="cyber-box rounded-lg border border-primary/30 bg-card/80 p-6 backdrop-blur-sm">
+            <div className="mb-4 flex items-center gap-3">
+              <Users className="h-8 w-8 text-primary" />
               <h2 className="text-lg font-semibold text-primary">Community</h2>
             </div>
-            <p className="text-gray-400 text-sm mb-4">Connect with other hackers and build together.</p>
+            <p className="mb-4 text-sm text-gray-400">
+              Connect with other hackers and build together.
+            </p>
             <Button
               variant="outline"
               size="sm"
               className="w-full"
-              onClick={() => window.open('https://discord.gg/6GaWZAawUc', '_blank')}
+              onClick={() =>
+                window.open('https://discord.gg/6GaWZAawUc', '_blank')
+              }
             >
-              <ExternalLink className="w-4 h-4 mr-2" />
+              <ExternalLink className="mr-2 h-4 w-4" />
               Join Discord
             </Button>
           </div>
 
-          <div className="bg-card/80 backdrop-blur-sm border border-primary/30 rounded-lg p-6 cyber-box">
-            <div className="flex items-center gap-3 mb-4">
-              <Link2 className="w-8 h-8 text-primary" />
+          <div className="cyber-box rounded-lg border border-primary/30 bg-card/80 p-6 backdrop-blur-sm">
+            <div className="mb-4 flex items-center gap-3">
+              <Link2 className="h-8 w-8 text-primary" />
               <h2 className="text-lg font-semibold text-primary">Home</h2>
             </div>
-            <p className="text-gray-400 text-sm mb-4">Visit our home page.</p>
+            <p className="mb-4 text-sm text-gray-400">Visit our home page.</p>
             <Link href="/">
               <Button variant="outline" size="sm" className="w-full">
-                <ExternalLink className="w-4 h-4 mr-2" />
+                <ExternalLink className="mr-2 h-4 w-4" />
                 Go to Home
               </Button>
             </Link>
@@ -106,28 +115,35 @@ export default function DashboardPage() {
         </div>
 
         {/* User Profile */}
-        <div className="bg-card/80 backdrop-blur-sm border border-primary/30 rounded-lg p-6 mb-6 cyber-box">
-          <h2 className="text-xl font-semibold mb-4 text-primary">Your Profile</h2>
+        <div className="cyber-box mb-6 rounded-lg border border-primary/30 bg-card/80 p-6 backdrop-blur-sm">
+          <h2 className="mb-4 text-xl font-semibold text-primary">
+            Your Profile
+          </h2>
           <div className="space-y-2 text-gray-300">
             <p>
-              <span className="font-medium text-primary">Email:</span> {user.email}
+              <span className="font-medium text-primary">Email:</span>{' '}
+              {user.email}
             </p>
             <p>
-              <span className="font-medium text-primary">User ID:</span> {user.id}
+              <span className="font-medium text-primary">User ID:</span>{' '}
+              {user.id}
             </p>
             {user.user_metadata?.full_name && (
               <p>
-                <span className="font-medium text-primary">Name:</span> {user.user_metadata.full_name}
+                <span className="font-medium text-primary">Name:</span>{' '}
+                {user.user_metadata.full_name}
               </p>
             )}
           </div>
         </div>
 
         {/* User Data (JSON) */}
-        <div className="bg-card/80 backdrop-blur-sm border border-primary/30 rounded-lg p-6 cyber-box">
-          <h2 className="text-xl font-semibold mb-4 text-primary">User Data (JSON)</h2>
-          <div className="bg-background rounded-lg p-4 border border-primary/20 overflow-auto">
-            <pre className="text-sm text-gray-300 whitespace-pre-wrap break-words">
+        <div className="cyber-box rounded-lg border border-primary/30 bg-card/80 p-6 backdrop-blur-sm">
+          <h2 className="mb-4 text-xl font-semibold text-primary">
+            User Data (JSON)
+          </h2>
+          <div className="overflow-auto rounded-lg border border-primary/20 bg-background p-4">
+            <pre className="whitespace-pre-wrap break-words text-sm text-gray-300">
               {JSON.stringify(user, null, 2)}
             </pre>
           </div>
