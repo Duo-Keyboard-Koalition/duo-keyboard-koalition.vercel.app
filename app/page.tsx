@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react'
 import { useAuth } from '@/context/AuthContext'
+import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import Loading from '@/components/Loading'
 import AuthForm from '@/components/AuthForm'
@@ -9,13 +10,14 @@ import { ExternalLink } from 'lucide-react'
 
 function HomePageContent() {
   const { user } = useAuth()
+  const router = useRouter()
   const searchParams = useSearchParams()
 
   const view = (searchParams.get('view') as 'signin' | 'signup') || 'signin'
 
   // If user is logged in, redirect to dashboard
   if (user) {
-    window.location.href = '/dashboard'
+    router.replace('/dashboard')
     return null
   }
 

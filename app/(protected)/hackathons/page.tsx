@@ -64,6 +64,7 @@ const TABS: { label: string; value: FilterTab }[] = [
 
 export default function Hackathons() {
   const { user, loading } = useAuth()
+  const router = useRouter()
   const [hackathons, setHackathons] = useState<Hackathon[]>([])
   const [filter, setFilter] = useState<FilterTab>("all")
   const [dataLoading, setDataLoading] = useState(true)
@@ -71,7 +72,7 @@ export default function Hackathons() {
 
   useEffect(() => {
     if (!loading && !user) {
-      window.location.href = "/unauthorized"
+      router.replace("/unauthorized")
     }
   }, [loading, user])
 

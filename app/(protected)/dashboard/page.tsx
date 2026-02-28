@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -10,12 +11,13 @@ import { ExternalLink, FolderKanban, Users, Link2 } from 'lucide-react'
 
 export default function DashboardPage() {
   const { user, loading, signOut } = useAuth()
+  const router = useRouter()
 
   useEffect(() => {
     if (!loading && !user) {
-      window.location.href = '/unauthorized'
+      router.replace('/unauthorized')
     }
-  }, [user, loading])
+  }, [user, loading, router])
 
   if (loading) {
     return <Loading />
@@ -27,7 +29,7 @@ export default function DashboardPage() {
 
   const handleSignOut = async () => {
     await signOut()
-    window.location.href = '/'
+    router.push('/')
   }
 
   return (
@@ -137,17 +139,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* User Data (JSON) */}
-        <div className="cyber-box rounded-lg border border-primary/30 bg-card/80 p-6 backdrop-blur-sm">
-          <h2 className="mb-4 text-xl font-semibold text-primary">
-            User Data (JSON)
-          </h2>
-          <div className="overflow-auto rounded-lg border border-primary/20 bg-background p-4">
-            <pre className="whitespace-pre-wrap break-words text-sm text-gray-300">
-              {JSON.stringify(user, null, 2)}
-            </pre>
-          </div>
-        </div>
+
       </div>
     </div>
   )

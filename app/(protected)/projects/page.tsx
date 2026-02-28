@@ -1,16 +1,18 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Loading from '@/components/Loading'
 import { ExternalLink, FolderKanban, Sparkles, Users } from 'lucide-react'
 
 export default function Projects() {
   const { user, loading } = useAuth()
+  const router = useRouter()
 
   useEffect(() => {
     if (!loading && !user) {
-      window.location.href = '/unauthorized'
+      router.replace('/unauthorized')
     }
   }, [loading, user])
 
