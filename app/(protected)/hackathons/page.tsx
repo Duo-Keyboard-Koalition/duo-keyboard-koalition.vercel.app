@@ -1,115 +1,166 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useAuth } from "@/context/AuthContext"
+import Loading from "@/components/Loading"
+import HackathonCard, { type Hackathon } from "@/components/HackathonCard"
+import { createClient } from "@/utils/supabase/client"
+
+const FALLBACK_HACKATHONS: Hackathon[] = [
+  {
+    id: "1",
+    title: "Duo Keyboard Build-Off",
+    description: "Build the most innovative dual-layout keyboard. Showcase your creativity and technical skills in this flagship DKK event.",
+    status: "active",
+    start_date: "2026-02-20",
+    end_date: "2026-03-05",
+    max_team_size: 4,
+    tags: ["Hardware", "Design"],
+    participant_count: 12,
+  },
+  {
+    id: "2",
+    title: "Rapid Prototype Challenge",
+    description: "Design and build a functional keyboard prototype in 48 hours. Speed and innovation are key — can you ship under pressure?",
+    status: "upcoming",
+    start_date: "2026-03-15",
+    end_date: "2026-03-17",
+    max_team_size: 2,
+    tags: ["Speed Build", "Innovation"],
+    participant_count: 5,
+  },
+  {
+    id: "3",
+    title: "Aesthetic Design Contest",
+    description: "Showcase your keyboard's visual design. Winners get featured in the community gallery and DKK hall of fame.",
+    status: "upcoming",
+    start_date: "2026-04-01",
+    end_date: "2026-04-30",
+    max_team_size: 1,
+    tags: ["Design", "Aesthetics"],
+    participant_count: 3,
+  },
+  {
+    id: "4",
+    title: "Firmware Hackathon",
+    description: "Build innovative firmware features and QMK/VIA configurations. Push the boundaries of what keyboard software can do.",
+    status: "ended",
+    start_date: "2026-01-10",
+    end_date: "2026-01-24",
+    max_team_size: 3,
+    tags: ["Firmware", "Software"],
+    participant_count: 18,
+  },
+]
+
+type FilterTab = "all" | "active" | "upcoming" | "ended"
+
+const TABS: { label: string; value: FilterTab }[] = [
+  { label: "All", value: "all" },
+  { label: "🟢 Active", value: "active" },
+  { label: "🔵 Upcoming", value: "upcoming" },
+  { label: "⚫ Past", value: "ended" },
+]
+
 export default function Hackathons() {
+  const { user, loading } = useAuth()
+  const [hackathons, setHackathons] = useState<Hackathon[]>([])
+  const [filter, setFilter] = useState<FilterTab>("all")
+  const [dataLoading, setDataLoading] = useState(true)
+  const supabase = createClient()
+
+  useEffect(() => {
+    if (!loading && !user) {
+      window.location.href = "/unauthorized"
+    }
+  }, [loading, user])
+
+  useEffect(() => {
+    if (!user) return
+    async function fetchHackathons() {
+      setDataLoading(true)
+      try {
+        const { data: hackathonData, error } = await supabase
+          .from("hackathons")
+          .select("*")
+          .order("created_at", { ascending: false })
+
+        if (error || !hackathonData?.length) {
+          setHackathons(FALLBACK_HACKATHONS)
+          setDataLoading(false)
+          return
+        }
+
+        // Fetch registration counts and user's own registrations
+        const { data: regData } = await supabase
+          .from("hackathon_registrations")
+          .select("hackathon_id, user_id")
+
+        const countMap: Record<string, number> = {}
+        const registeredSet = new Set<string>()
+        for (const reg of regData ?? []) {
+          countMap[reg.hackathon_id] = (countMap[reg.hackathon_id] ?? 0) + 1
+          if (reg.user_id === user!.id) registeredSet.add(reg.hackathon_id)
+        }
+
+        setHackathons(
+          hackathonData.map((h) => ({
+            ...h,
+            participant_count: countMap[h.id] ?? 0,
+            is_registered: registeredSet.has(h.id),
+          }))
+        )
+      } catch {
+        setHackathons(FALLBACK_HACKATHONS)
+      } finally {
+        setDataLoading(false)
+      }
+    }
+    fetchHackathons()
+  }, [user])
+
+  if (loading) return <Loading />
+  if (!user) return null
+
+  const filtered = filter === "all" ? hackathons : hackathons.filter((h) => h.status === filter)
+
   return (
     <div className="max-w-6xl mx-auto pt-20 text-white px-4 min-h-screen">
       <h1 className="text-4xl font-bold mb-3 text-center bg-clip-text text-transparent bg-gradient-to-r from-primary via-[#FFB84D] to-[#CC8400]">
         Hackathons & Events
       </h1>
-      <p className="text-xl text-center mb-12 text-gray-300">
+      <p className="text-xl text-center mb-8 text-gray-300">
         Join keyboard building competitions and community events
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-        <div className="bg-background/80 backdrop-blur-sm border border-primary/30 rounded-lg p-6 hover:border-primary/50 transition-colors">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="text-3xl">🏆</div>
-            <div>
-              <h2 className="text-xl font-semibold text-primary">Duo Keyboard Build-Off</h2>
-              <p className="text-sm text-gray-400">Active • Ends in 5 days</p>
-            </div>
-          </div>
-          <p className="text-gray-300 mb-4">
-            Build the most innovative dual-layout keyboard. Showcase your creativity and technical skills.
-          </p>
-          <div className="flex gap-2 mb-4">
-            <span className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm">Hardware</span>
-            <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">Design</span>
-          </div>
-          <button className="w-full py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors">
-            Join Hackathon
+      {/* Filter Tabs */}
+      <div className="flex gap-2 justify-center mb-10 flex-wrap">
+        {TABS.map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => setFilter(tab.value)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              filter === tab.value
+                ? "bg-primary text-black"
+                : "bg-background/60 text-gray-300 border border-primary/30 hover:border-primary/60"
+            }`}
+          >
+            {tab.label}
           </button>
-        </div>
-
-        <div className="bg-background/80 backdrop-blur-sm border border-purple-500/30 rounded-lg p-6 hover:border-purple-500/50 transition-colors">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="text-3xl">⚡</div>
-            <div>
-              <h2 className="text-xl font-semibold text-purple-300">Rapid Prototype Challenge</h2>
-              <p className="text-sm text-gray-400">Upcoming • Starts in 2 weeks</p>
-            </div>
-          </div>
-          <p className="text-gray-300 mb-4">
-            Design and build a functional keyboard prototype in 48 hours. Speed and innovation are key.
-          </p>
-          <div className="flex gap-2 mb-4">
-            <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">Speed Build</span>
-            <span className="px-3 py-1 bg-pink-500/20 text-pink-300 rounded-full text-sm">Innovation</span>
-          </div>
-          <button className="w-full py-2 bg-purple-500/20 text-purple-300 rounded-lg hover:bg-purple-500/30 transition-colors">
-            Register Interest
-          </button>
-        </div>
-
-        <div className="bg-background/80 backdrop-blur-sm border border-pink-500/30 rounded-lg p-6 hover:border-pink-500/50 transition-colors">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="text-3xl">🎨</div>
-            <div>
-              <h2 className="text-xl font-semibold text-pink-300">Aesthetic Design Contest</h2>
-              <p className="text-sm text-gray-400">Ongoing • Monthly</p>
-            </div>
-          </div>
-          <p className="text-gray-300 mb-4">
-            Showcase your keyboard&apos;s visual design. Winners featured in community gallery.
-          </p>
-          <div className="flex gap-2 mb-4">
-            <span className="px-3 py-1 bg-pink-500/20 text-pink-300 rounded-full text-sm">Design</span>
-            <span className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm">Aesthetics</span>
-          </div>
-          <button className="w-full py-2 bg-pink-500/20 text-pink-300 rounded-lg hover:bg-pink-500/30 transition-colors">
-            Submit Entry
-          </button>
-        </div>
-
-        <div className="bg-background/80 backdrop-blur-sm border border-primary/30 rounded-lg p-6 hover:border-primary/50 transition-colors">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="text-3xl">🔧</div>
-            <div>
-              <h2 className="text-xl font-semibold text-primary">Firmware Hackathon</h2>
-              <p className="text-sm text-gray-400">Upcoming • Starts in 1 month</p>
-            </div>
-          </div>
-          <p className="text-gray-300 mb-4">
-            Build innovative firmware features and QMK/VIA configurations. Push the boundaries of keyboard software.
-          </p>
-          <div className="flex gap-2 mb-4">
-            <span className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm">Firmware</span>
-            <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">Software</span>
-          </div>
-          <button className="w-full py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors">
-            Learn More
-          </button>
-        </div>
+        ))}
       </div>
 
-      <div className="bg-background/80 backdrop-blur-sm border border-primary/30 rounded-lg p-8">
-        <h2 className="text-2xl font-bold mb-6 text-primary">Past Winners</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-background rounded-lg p-4 border border-primary/20">
-            <div className="text-2xl mb-2">🥇</div>
-            <h3 className="font-semibold text-white mb-1">Modular 65%</h3>
-            <p className="text-sm text-gray-400">by @keyboard_master</p>
-          </div>
-          <div className="bg-background rounded-lg p-4 border border-primary/20">
-            <div className="text-2xl mb-2">🥈</div>
-            <h3 className="font-semibold text-white mb-1">Ergo Split Pro</h3>
-            <p className="text-sm text-gray-400">by @ergo_builder</p>
-          </div>
-          <div className="bg-background rounded-lg p-4 border border-primary/20">
-            <div className="text-2xl mb-2">🥉</div>
-            <h3 className="font-semibold text-white mb-1">Wireless TKL</h3>
-            <p className="text-sm text-gray-400">by @wireless_wizard</p>
-          </div>
+      {dataLoading ? (
+        <div className="text-center text-gray-400 py-20">Loading hackathons…</div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center text-gray-400 py-20">No hackathons in this category yet.</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          {filtered.map((h) => (
+            <HackathonCard key={h.id} hackathon={h} userId={user.id} />
+          ))}
         </div>
-      </div>
+      )}
     </div>
   )
 }
